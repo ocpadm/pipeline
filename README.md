@@ -93,3 +93,11 @@ def call() {
 
             } // end with
 }
+## mailFeedBack
+def call(String mailRecipients, String message) {
+            emailext (
+      		subject: "${message}",
+      		body: "${message}",
+	        to: "${mailRecipients}",
+      		replyTo: "admin@agilesolutions.com")
+}
