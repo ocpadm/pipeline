@@ -9,5 +9,10 @@ pipeline {
         
       }
     }
+    stage('user') {
+      steps {
+        input(message: 'do you want to continue', id: 'continue')
+      }
+    }
   }
 }
