@@ -24,7 +24,8 @@ pipeline {
       steps {
         script {
           timeout(time: 5, unit: 'MINUTES') {
-            input message: "${message}"
+            env.RELEASE_SCOPE = input message: 'User input 				required', ok: 'Release!',
+            parameters: [choice(name: 'RELEASE_SCOPE', choices: 		'SIT\nUAT\nPROD', description: 'What is the release scope?')]
           }
         }
         
