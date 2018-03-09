@@ -33,4 +33,63 @@ def call(String id) {
 		echo response.toString()
 	}
 }
-## 
+## getConfig
+def call(String profile) {
+	sh "curl --silent --insecure -o initial.cli https://jctd/rest/profile/cli/${profile}"
+}
+## getFreePort
+#!/usr/bin/groovy
+def call() {
+    sh (script: "ss -tln | awk 'NR > 1{gsub(/.*:/,\"\",\$4); print \$4}' | sort -un | awk -v n=9090 '\$0 < n {next}; \$0 == n {n++; next}; {exit}; END {print n}'", returnStdout:true)
+}
+## jiraFeedBack
+def call(String comment) {
+   withEnv(['JIRA_SITE=agilesolutions']) {
+        		echo "Tagging JIRA deployment ticket ${env.JIRA_ISSUE_KEY}"
+            	jiraAddComment idOrKey: env.JIRA_ISSUE_KEY , comment: "${comment}"
+        	}
+}
+## jiraGetTicket
+def call() {
+             withEnv(['JIRA_SITE=agilesolutions']) {
+	             def issue = jiraGetIssue idOrKey: env.JIRA_ISSUE_KEY, site: 'agilesolutions'
+			     env.VERSION = issue.data.fields.get("summary")
+			     echo "deploying version ${env.VERSION} through deployment ticket ${env.JIRA_ISSUE_KEY}"
+			 }
+}
+## jiraInput
+def call() {
+   timeout(time: 5, unit: 'MINUTES') {
+             env.JIRA_ISSUE_KEY = input message: 'Specify ISSUE KEY', parameters: [string(defaultValue: '', description: '', name: 'JIRA_ISSUE_KEY')]
+             withEnv(['JIRA_SITE=agilesolutions']) {
+	             def issue = jiraGetIssue idOrKey: env.JIRA_ISSUE_KEY, site: 'agilesolutions'
+			     env.VERSION = issue.data.fields.get("summary")
+			     echo "deploying version ${env.VERSION} through deployment ticket ${env.JIRA_ISSUE_KEY}"
+			 }
+    }
+}
+## jiraNotify
+def call() {
+        	withEnv(['JIRA_SITE=agilesolutions']) {
+        		echo "Notify JIRA watchers ${env.JIRA_ISSUE_KEY}"
+				def notify = [ subject: 'Update about ',
+                    textBody: 'Update on deployment ticket ...',
+                   	htmlBody: 'Update on deployment ticket ...',
+                   	to: [ reporter: true,assignee: true]]
+    			jiraNotifyIssue idOrKey: env.JIRA_ISSUE_KEY, notify: notify
+            } // end with
+}
+## jiraTransition
+def call() {
+        	withEnv(['JIRA_SITE=agilesolutions']) {
+        			echo "Complete JIRA deployment ticket ${env.JIRA_ISSUE_KEY}"
+        			def transitionInput =
+						[
+        						transition: [id: '"${env.JIRA_ISSUE_KEY}
+"']
+    					]
+
+				jiraTransitionIssue idOrKey:  env.JIRA_ISSUE_KEY, input: transitionInput
+
+            } // end with
+}
