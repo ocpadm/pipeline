@@ -11,7 +11,7 @@ pipeline {
     }
     stage('user') {
       steps {
-        input(message: 'do you want to continue', id: 'continue')
+        input(message: 'do you want to deploy', id: 'deploy', ok: 'yes', submitter: 'rob', submitterParameter: 'ok')
       }
     }
   }
