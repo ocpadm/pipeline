@@ -20,5 +20,15 @@ pipeline {
         
       }
     }
+    stage('confirm') {
+      steps {
+        script {
+          timeout(time: 5, unit: 'MINUTES') {
+            input message: "${message}"
+          }
+        }
+        
+      }
+    }
   }
 }
